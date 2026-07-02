@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#7c4daf">
+<title>FitTrack Elena</title>
+<link rel="manifest" href="manifest.json">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--a:#7c4daf;--al:#f0ebf8;--ad:#5c3080;--bg:#f5f3f8;--card:#fff;--bd:#e8e0f0;--t1:#2d1b4e;--t2:#7a6e8a;--t3:#b8adc8;--ok:#43a047;--warn:#f57c00;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--t1);font-size:15px;}
+#app{display:flex;flex-direction:column;height:100vh;}
+#hdr{background:var(--card);border-bottom:.5px solid var(--bd);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;min-height:56px;flex-shrink:0;}
+#hdr h1{font-size:17px;font-weight:600;}
+#hdr-tag{font-size:11px;color:var(--a);font-weight:600;background:var(--al);padding:3px 10px;border-radius:10px;}
+#content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+#nav{background:var(--card);border-top:.5px solid var(--bd);display:flex;padding:6px 0 calc(6px + env(safe-area-inset-bottom,0px));flex-shrink:0;}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;cursor:pointer;color:var(--t3);border:none;background:none;font-size:10px;}
+.ni.on{color:var(--a);}
+.ni svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+.tab{display:none;padding:16px;}
+.tab.on{display:block;}
+.card{background:var(--card);border-radius:14px;border:.5px solid var(--bd);margin-bottom:12px;overflow:hidden;}
+.ch{padding:14px 16px 0;}
+.ct{font-size:14px;font-weight:600;}
+.cs{font-size:12px;color:var(--t2);margin-top:2px;}
+.cb{padding:12px 16px;}
+.sec{font-size:12px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin:18px 0 8px;}
+.sec:first-child{margin-top:0;}
+.pill-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+.pill{border-radius:20px;padding:7px 15px;font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid var(--bd);background:var(--bg);color:var(--t2);transition:all .15s;min-height:38px;display:flex;align-items:center;}
+.pill.sel{background:var(--a);border-color:var(--a);color:#fff;}
+.pill:active{transform:scale(.96);}
+.ex-card{padding:14px 16px;border-bottom:.5px solid var(--bd);}
+.ex-card:last-child{border-bottom:none;}
+.ex-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2px;}
+.ex-name{font-size:15px;font-weight:600;}
+.ex-sets{font-size:12px;color:var(--t2);margin-bottom:10px;}
+.ex-lbl{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;font-weight:500;}
+.info-btn{width:24px;height:24px;border-radius:50%;background:var(--al);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--a);font-size:13px;font-weight:700;flex-shrink:0;}
+.btn{display:block;width:100%;padding:14px;border-radius:12px;border:none;font-size:15px;font-weight:600;cursor:pointer;transition:all .15s;text-align:center;}
+.btn-p{background:var(--a);color:#fff;}
+.btn-p:active{background:var(--ad);transform:scale(.98);}
+.btn-g{background:var(--al);color:var(--a);}
+.btn-g:active{opacity:.8;}
+.btn-sm{padding:10px;border-radius:10px;font-size:13px;}
+.water-row{display:flex;align-items:center;gap:14px;}
+.glasses{display:flex;gap:6px;flex-wrap:wrap;}
+.glass{width:30px;height:30px;border-radius:8px;border:1.5px solid var(--bd);background:var(--bg);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.glass.on{background:var(--a);border-color:var(--a);}
+.w-cnt{font-size:24px;font-weight:700;color:var(--a);}
+.supp-item{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;border-bottom:.5px solid var(--bd);}
+.supp-item:last-child{border-bottom:none;}
+.s-chk{width:24px;height:24px;border-radius:50%;border:2px solid var(--bd);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.s-chk.on{background:var(--a);border-color:var(--a);}
+.s-chk.on::after{content:'✓';color:#fff;font-size:12px;font-weight:700;}
+.s-name{font-size:14px;color:var(--t1);flex:1;transition:all .15s;}
+.s-name.on{color:var(--t3);}
+.s-note{font-size:11px;color:var(--t3);margin-top:1px;}
+.t-hdr{background:var(--al);padding:8px 16px;font-size:12px;font-weight:600;color:var(--a);}
+.w-inp{width:100%;padding:12px;border-radius:10px;border:1.5px solid var(--bd);font-size:18px;color:var(--t1);background:var(--card);text-align:center;font-weight:600;}
+.w-inp:focus{outline:none;border-color:var(--a);}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.stat{background:var(--card);border-radius:12px;border:.5px solid var(--bd);padding:14px;}
+.stat-l{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;}
+.stat-v{font-size:22px;font-weight:700;color:var(--a);}
+.stat-u{font-size:12px;color:var(--t2);}
+.meal-day{cursor:pointer;}
+.meal-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;}
+.meal-name{font-size:15px;font-weight:600;}
+.meal-theme{font-size:12px;color:var(--t2);}
+.meal-body{display:none;padding:0 0 12px;}
+.meal-body.on{display:block;}
+.meal-tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.meal-tbl th{background:var(--al);color:var(--a);padding:6px 10px;text-align:left;font-weight:600;font-size:11px;}
+.meal-tbl td{padding:8px 10px;border-bottom:.5px solid var(--bd);vertical-align:top;color:var(--t1);line-height:1.4;}
+.meal-tbl tr:last-child td{border-bottom:none;}
+.p-badge{display:inline-block;background:var(--al);color:var(--a);border-radius:10px;padding:2px 8px;font-size:10px;font-weight:600;}
+.note-box{background:#fff8e1;border-left:3px solid var(--warn);border-radius:0 8px 8px 0;padding:10px 12px;margin:8px 16px;font-size:12px;color:#5d4037;line-height:1.4;}
+.modal-ov{position:fixed;inset:0;background:rgba(45,27,78,.5);display:flex;align-items:flex-end;z-index:100;opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-ov.on{opacity:1;pointer-events:all;}
+.modal{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-height:88vh;overflow-y:auto;padding:20px 16px 32px;transform:translateY(100%);transition:transform .25s ease;}
+.modal-ov.on .modal{transform:translateY(0);}
+.modal-hnd{width:40px;height:4px;background:var(--bd);border-radius:2px;margin:0 auto 16px;}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:3px;}
+.modal-sub{font-size:13px;color:var(--t2);margin-bottom:16px;}
+.m-diagram{display:flex;gap:20px;justify-content:center;margin:12px 0 16px;}
+.m-diagram div{text-align:center;}
+.m-diagram p{font-size:10px;color:var(--t3);margin-top:4px;}
+.step-list{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;}
+.step{display:flex;gap:10px;}
+.s-num{width:24px;height:24px;border-radius:50%;background:var(--al);color:var(--a);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.s-txt{font-size:14px;color:var(--t1);line-height:1.5;}
+.warn-box{background:#fff8e1;border-left:3px solid #f57c00;border-radius:0 8px 8px 0;padding:10px 12px;font-size:13px;color:#5d4037;line-height:1.4;}
+.muscles-row{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0;}
+.m-badge{padding:4px 12px;border-radius:12px;font-size:12px;font-weight:500;}
+.m-p{background:var(--a);color:#fff;}
+.m-s{background:var(--al);color:var(--a);}
+.tok-inp{width:100%;padding:12px;border-radius:10px;border:1.5px solid var(--bd);font-size:13px;color:var(--t1);background:var(--card);font-family:monospace;}
+.tok-inp:focus{outline:none;border-color:var(--a);}
+.empty{text-align:center;padding:48px 20px;color:var(--t2);}
+.empty-ico{font-size:44px;margin-bottom:12px;}
+.loading{text-align:center;padding:48px 20px;color:var(--t2);font-size:14px;}
+.tag{display:inline-block;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:600;}
+.tag-ok{background:#e8f5e9;color:#2e7d32;}
+.tag-w{background:#fff8e1;color:#e65100;}
+.today-date{font-size:13px;color:var(--t2);}
+.rem-box{background:var(--al);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:13px;color:var(--ad);line-height:1.5;}
+.fin-box{background:#e8f5e9;border-radius:12px;padding:14px 16px;margin:16px;text-align:center;font-size:14px;color:#2e7d32;font-weight:500;}
+.chevron{transition:transform .2s;}
+.chevron.open{transform:rotate(180deg);}
+.wlog-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:.5px solid var(--bd);}
+.wlog-row:last-child{border-bottom:none;}
+.wlog-date{font-size:13px;color:var(--t2);}
+.wlog-val{font-size:15px;font-weight:600;color:var(--a);}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="hdr">
+    <h1 id="hdr-title">Bună ziua 👋</h1>
+    <span id="hdr-tag"></span>
+  </div>
+  <div id="content">
+    <div class="tab on" id="tab-today">
+      <div id="today-inner"><div class="loading">Se încarcă...</div></div>
+    </div>
+    <div class="tab" id="tab-workout">
+      <div id="workout-inner"><div class="loading">Se încarcă din Todoist...</div></div>
+    </div>
+    <div class="tab" id="tab-meals">
+      <div id="meals-inner"></div>
+    </div>
+    <div class="tab" id="tab-suppl">
+      <div id="suppl-inner"></div>
+    </div>
+    <div class="tab" id="tab-prog">
+      <div id="prog-inner"></div>
+    </div>
+    <div class="tab" id="tab-set">
+      <div id="set-inner"></div>
+    </div>
+  </div>
+  <div id="nav">
+    <button class="ni on" onclick="sw('today')" id="ni-today">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Azi
+    </button>
+    <button class="ni" onclick="sw('workout')" id="ni-workout">
+      <svg viewBox="0 0 24 24"><path d="M6.5 6.5h11M3 12h18M6.5 17.5h11"/><circle cx="3" cy="12" r="1.5"/><circle cx="21" cy="12" r="1.5"/></svg>Antrenament
+    </button>
+    <button class="ni" onclick="sw('meals')" id="ni-meals">
+      <svg viewBox="0 0 24 24"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>Mese
+    </button>
+    <button class="ni" onclick="sw('suppl')" id="ni-suppl">
+      <svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>Suplimente
+    </button>
+    <button class="ni" onclick="sw('prog')" id="ni-prog">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Progres
+    </button>
+    <button class="ni" onclick="sw('set')" id="ni-set">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Setări
+    </button>
+  </div>
+</div>
+
+<div class="modal-ov" id="ex-modal" onclick="closeModal(event)">
+  <div class="modal" id="ex-modal-body">
+    <div class="modal-hnd"></div>
+    <div id="ex-modal-content"></div>
+  </div>
+</div>
+
+<script>
+const PROJ_ID = '6gvPmqQW7p6mV63c';
+
+function exSlug(ex){return ex.split('—')[0].split('–')[0].replace(/[^a-zA-Z0-9]/g,'').toLowerCase().substring(0,12);}
+function getStep(kg){if(kg<=0)return 0;if(kg<=5)return 1;if(kg<=15)return 2.5;return 5;}
+function kKey(wid,i){return 'kg_'+wid+'_'+i;}
+function ls(k,v){if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}
+function lsJ(k,v){if(v===undefined){try{return JSON.parse(localStorage.getItem(k)||'null')}catch{return null}}localStorage.setItem(k,JSON.stringify(v));}
+
+const EX_DB = {
+  'gobletsquat':{name:'Goblet squat',sets:'3×12',primary:['Quadriceps','Fesieri'],secondary:['Core'],steps:['Ține gantera vertical la piept cu ambele mâini.','Picioare la lățimea umerilor, vârfuri ușor în afară.','Coboară controlat până când coapsele sunt paralele cu podeaua.','Împinge prin călcâie la urcare, expiră sus.'],warning:'Fără apnee. Mergi 30s sau fă calf raises între seturi (vene).'},
+  'legpressgreu':{name:'Leg press',sets:'3×12',primary:['Quadriceps'],secondary:['Ischiogambieri','Fesieri'],steps:['Picioare la lățimea umerilor pe platformă.','Coboară controlat până la 90°.','Nu bloca genunchii la extensie completă.','Împinge uniform prin toată talpa.'],warning:'Fără apnee. Mergi 30s între seturi (vene).'},
+  'hipabductorm':{name:'Hip abductor machine',sets:'3×15',primary:['Fesier mijlociu','Abductori'],secondary:[],steps:['Stai drept cu spatele pe spătar.','Deschide picioarele controlat până la amplitudine maximă.','Revino lent — nu lăsa greutatea să cadă.','Contractă fesierii în punctul de maximă deschidere.'],warning:'Mergi 30s între seturi (vene).'},
+  'glutebridgec':{name:'Glute bridge (pauză 2 sec)',sets:'3×15',primary:['Fesieri'],secondary:['Ischiogambieri','Core'],steps:['Culcat pe spate, genunchi îndoiți, tălpile pe podea.','Retroversie pelviană — apasă zona lombară în podea.','Ridică șoldurile contractând fesierii. Ține 2 secunde sus.','Coboară controlat.'],warning:'Retroversie pelviană obligatorie — nu permite arcul lombar (hiperlordoză). Fără apnee.'},
+  'calfraises':{name:'Calf raises',sets:'3×20',primary:['Gastrocnemian','Solear'],secondary:[],steps:['Stai pe o treptuță sau pe podea cu gantera în mână.','Ridică-te complet pe vârfuri, ține 1 secundă.','Coboară lent, sub nivelul de start dacă ai treptuță.','Alternează gantera la fiecare serie.'],warning:'Exercițiu terapeutic pentru vene — esențial! Fă-le și ÎNTRE seturi la alte exerciții în loc să stai static.'},
+  'deadbug':{name:'Dead bug',sets:'3×10/parte',primary:['Transvers abdominal','Core profund'],secondary:['Stabilizatori coloană'],steps:['Culcat pe spate, brațe spre tavan, genunchi la 90° (masa).','Retroversie pelviană — spatele PLAT pe saltea tot timpul.','Coboară simultan brațul drept și piciorul stâng spre podea.','Revino lent fără să atingi podeaua, schimbă.'],warning:'Dacă spatele se ridică de pe podea — reduci amplitudinea. Înlocuiește crunch-ul (contraindicat hiperlordoză).'},
+  'latpulldownf':{name:'Lat pulldown (față)',sets:'3×12',primary:['Latissimus dorsi'],secondary:['Biceps','Deltoid posterior'],steps:['Prinde bara ceva mai lată decât umerii, palme față.','Trage bara spre bărbie, coatele coboară jos și înapoi.','Pieptul ușor ridicat spre bară.','Revino lent cu control, nu lăsa umerii să urce.'],warning:'Fără apnee. Esențial pentru postură — nu sări peste el.'},
+  'seatedrow':{name:'Seated row',sets:'3×12',primary:['Romboid','Trapez mijlociu'],secondary:['Biceps','Dorsal'],steps:['Trage mânerele spre abdomen, coatele aproape de corp.','Strânge omoplații la final — 1 secundă izometric.','Revino lent, nu lăsa trunchiul să cadă înainte.','Spatele drept pe tot parcursul mișcării.'],warning:'Fără apnee. Nu te balansa din trunchi.'},
+  'facepull':{name:'Face pull ⭐',sets:'3×15',primary:['Deltoid posterior','Rotatori manșetă'],secondary:['Trapez superior'],steps:['Cablu la înălțimea feței sau mai sus, prinde cu ambele mâini.','Trage spre față cu coatele la nivelul sau deasupra umerilor.','Separă mâinile la final, degetele mari spre spate (thumbs back).','Revino controlat — nu lăsa greutatea să cadă.'],warning:'CEL MAI IMPORTANT exercițiu pentru postura ta (cervicală + umeri). Nu-l sări niciodată!'},
+  'lateralraise':{name:'Lateral raises',sets:'3×12',primary:['Deltoid lateral'],secondary:[],steps:['Gantere mici, coate ușor îndoite.','Ridică lateral până la înălțimea umerilor.','Nu ridica umerii — contractă trapezodul în jos.','Coboară lent, 3 secunde — faza excentrică e importantă.'],warning:'Greutate mică — forma contează, nu kg. Nu balansa corpul.'},
+  'bicepcurlsga':{name:'Bicep curls (gantere)',sets:'3×12',primary:['Biceps brachii'],secondary:['Brachialis'],steps:['Coatele fixe lângă corp pe tot parcursul.','Ridică alternativ sau simultan, rotând palma spre tavan.','Contractă bicepsul sus — 1 secundă.','Coboară lent cu control.'],warning:'Nu balansa corpul pentru a ajuta ridicarea. Coatele rămân fixe.'},
+  'triceppushdo':{name:'Tricep pushdown (cablu)',sets:'3×12',primary:['Triceps'],secondary:[],steps:['Prinde bara/mânerul, coatele fixe lângă corp.','Extinde complet brațele în jos.','Contractă tricepsul sus — 1 secundă.','Revino lent la 90°.'],warning:'Coatele nu se mișcă. Umerii relaxați jos.'},
+  'romaniandead':{name:'Romanian deadlift (gantere)',sets:'3×10',primary:['Ischiogambieri'],secondary:['Fesieri','Lombari'],steps:['Gantere în față, picioare la lățimea șoldurilor.','Împinge șoldurile ÎNAPOI coborând ganterele de-a lungul coapselor.','Spatele drept tot timpul — niciodată rotund.','Revino contractând fesierii și lombarii.'],warning:'Spatele drept obligatoriu. Fără apnee. Mergi 30s între seturi (vene).'},
+  'stepup':{name:'Step-up',sets:'3×10/picior',primary:['Quadriceps','Fesieri'],secondary:['Echilibru','Stabilizatori'],steps:['Stai în față treptei/băncii.','Urcă cu un picior — împinge prin călcâiul piciorului de sus.','Adă celălalt picior, stai 1 secundă sus.','Coboară controlat. Alternează piciorul de start.'],warning:'Mergi 30s între seturi (vene).'},
+  'hipadductorm':{name:'Hip adductor machine',sets:'3×12',primary:['Aductori','Coapsă internă'],secondary:[],steps:['Stai cu spatele pe spătar, picioarele pe platformele laterale.','Contractă picioarele spre interior, controlat.','Ține 1 secundă la închidere maximă.','Revino lent — nu lăsa greutatea să controleze.'],warning:'Mergi 30s între seturi (vene).'},
+  'shoulderpres':{name:'Shoulder press (gantere)',sets:'3×12',primary:['Deltoid anterior și lateral'],secondary:['Triceps'],steps:['Gantere la nivelul umerilor, palme față.','Împinge vertical spre tavan, fără a bloca coatele.','Nu arcui spatele — contractă abdomenul.','Coboară lent.'],warning:'Fără apnee. Dacă arcuiești spatele, reduce greutatea.'},
+  'birddog':{name:'Bird-dog',sets:'3×10/parte',primary:['Core','Lombari'],secondary:['Fesieri'],steps:['În 4 labe, coloana neutră (nici arcuită, nici încovoiată).','Extinde simultan brațul drept și piciorul stâng.','Ține 2-3 secunde — nu ridica piciorul mai sus decât șoldul.','Revino fără să atingi podeaua, schimbă partea.'],warning:'Coloana neutră în orice moment (hiperlordoză). Nu ridica piciorul deasupra liniei șoldului.'},
+  'chestpressin':{name:'Chest press inclinat (gantere)',sets:'3×12',primary:['Pectoral'],secondary:['Deltoid anterior','Triceps'],steps:['Bancă inclinată 30-45°, gantere la nivelul pieptului.','Coate la 45° față de trunchi.','Împinge spre tavan, fără a bloca coatele.','Coboară lent, controlat.'],warning:'Fără apnee.'},
+  'ramatganters':{name:'Ramat ganteră single-arm',sets:'3×10/parte',primary:['Latissimus dorsi','Romboid'],secondary:['Biceps'],steps:['O mână și un genunchi pe bancă, spatele paralel cu podeaua.','Trage gantera spre șold, cotul aproape de corp.','Omoplatul se strânge la final — 1 secundă.','Coboară lent.'],warning:'Spatele drept, paralel cu podeaua. Fără rotație de trunchi.'},
+  'plank':{name:'Plank',sets:'3×30 sec',primary:['Core','Transvers abdominal'],secondary:['Umeri','Fesieri'],steps:['Antebrațe pe podea, corp drept de la cap la călcâie.','RETROVERSIE PELVIANĂ — basculează bazinul ușor în față.','Contractă abdomenul și fesierii. Respiră normal.','Dacă forma cedează, oprește — calitate > timp.'],warning:'Retroversie pelviană obligatorie — nu permite arcul lombar (hiperlordoză). Dacă spatele coboară, oprești.'},
+  'gobletsquatu':{name:'Goblet squat ușor',sets:'3×12',primary:['Quadriceps','Fesieri'],secondary:['Core'],steps:['Ca goblet squat clasic, dar cu greutate redusă.','Focus pe mobilitate și tehnică, nu pe greutate.','Coboară cât mai jos cu spatele drept.','Revino controlat.'],warning:'Fără apnee. Mergi 30s sau fă calf raises între seturi (vene).'}
+};
+
+const MEALS = [
+  {day:'Luni',theme:'Pui + salată',note:'',rows:[
+    {masa:'Mic dejun',elena:'🥣 Ovăz 50g + lapte fără lactoză 200ml + banană + nuci (~15g prot)\nSAU Omletă 2 ouă + ciuperci + brânză 50g (19g prot)',copil:'Cereale cu lapte (singur)',sot:'Nu mănâncă'},
+    {masa:'Prânz',elena:'Piept pui/curcan 120g + salată + shake 1 scoop (21g prot)',copil:'La școală',sot:'La serviciu + shake 2 scoops (42g prot)'},
+    {masa:'Cină',elena:'Piept pui/curcan 130g + salată mare + lămâie',copil:'Nuggets + cartofi prăjiți airfryer',sot:'Piept pui/curcan 160g + salată\n(fără pâine + 1 pahar vin sec)'}
+  ],prot:{elena:'110-120g',sot:'104g+'}},
+  {day:'Marți',theme:'Burger + varză',note:'⚽ Soț: fotbal 20:00 — cină înainte de meci, FĂRĂ vin marți. Post-meci ~5 beri (fotbalul compensează caloric).',rows:[
+    {masa:'Mic dejun',elena:'2 ouă fierte + brânză cu smântână + roșii + telemea 50g',copil:'Cereale cu lapte (singur)',sot:'Nu mănâncă'},
+    {masa:'Prânz',elena:'Ton 1 cutie ~80g + salată + 1 ou fiert + shake 1 scoop (21g)',copil:'La școală',sot:'La serviciu + shake 2 scoops (42g prot)'},
+    {masa:'Cină',elena:'Burger vită 130g + salată varză + roșii',copil:'Burger în chiflă + cartofi prăjiți + salată varză',sot:'Burger vită 160g + salată varză\n(fără chiflă, FĂRĂ vin ⚽ pre-game)'}
+  ],prot:{elena:'103g',sot:'100g+'}},
+  {day:'Miercuri',theme:'Cotlet porc / Șnițele',note:'',rows:[
+    {masa:'Mic dejun',elena:'🥣 Ovăz 50g + lapte fără lactoză 200ml + fructe de pădure + semințe\nSAU Omletă 2 ouă + legume + brânză 50g (19g)',copil:'Cereale cu lapte (singur)',sot:'Nu mănâncă'},
+    {masa:'Prânz',elena:'Curcan/pui ~100g + shake 1 scoop (21g)',copil:'La școală',sot:'La serviciu + shake 2 scoops (42g prot)'},
+    {masa:'Cină',elena:'Cotlet porc slab 130g + lămâie + salată verde\nSAU șnițel pui 160g airfryer',copil:'Cotlet/șnițel + cartofi fierți',sot:'Cotlet porc 160g + salată\n(fără cartofi + 1 pahar vin sec)'}
+  ],prot:{elena:'110-120g',sot:'93g+'}},
+  {day:'Joi',theme:'Mici + salată varză 🔥',note:'Elena: carne roșie pentru feritină! Lămâie pe mici.',rows:[
+    {masa:'Mic dejun',elena:'2 ouă fierte + legume + brânză 50g + pâine integrală',copil:'Cereale cu lapte (singur)',sot:'Nu mănâncă'},
+    {masa:'Prânz',elena:'Macrou conservă ~90g + salată + shake 1 scoop (21g)',copil:'La școală',sot:'La serviciu + shake 2 scoops (42g prot)'},
+    {masa:'Cină',elena:'Mici 3 buc ~150g + salată varză + muștar (+ lămâie!)',copil:'Mici + cartofi prăjiți airfryer + salată',sot:'Mici 5 buc ~250g + salată varză'}
+  ],prot:{elena:'88g',sot:'93g+'}},
+  {day:'Vineri',theme:'Pizza din lipie',note:'',rows:[
+    {masa:'Mic dejun',elena:'Omletă 2 ouă + legume + brânză 50g + pâine integrală',copil:'Cereale cu lapte (singur)',sot:'Nu mănâncă'},
+    {masa:'Prânz',elena:'Piept pui 120g + salată + shake 1 scoop (21g)',copil:'La școală',sot:'La serviciu + shake 2 scoops (42g prot)'},
+    {masa:'Cină',elena:'Pizza lipie + pui 100g + legume + mozzarella + salată',copil:'Pizza lipie + sos roșii + mozzarella 60g',sot:'Pizza lipie + pui 150g + mozzarella\n(+ 1 pahar vin sec)'}
+  ],prot:{elena:'111g',sot:'94g+'}},
+  {day:'Sâmbătă',theme:'Shawarma',note:'',rows:[
+    {masa:'Mic dejun',elena:'2 ouă posate + brânză cu smântână + roșii + telemea 50g',copil:'Cereale cu lapte (singur)',sot:'3 ouă posate + brânză + telemea 50g'},
+    {masa:'Prânz',elena:'Chiftele 130g airfryer + salată + piure ușor Thermomix',copil:'Chiftele + cartofi prăjiți airfryer',sot:'Chiftele 200g + salată + piure'},
+    {masa:'Cină',elena:'Shawarma: pulpe pui 150g crispy + lipie + legume + sos iaurt',copil:'Shawarma pui crispy + cartofi airfryer',sot:'Shawarma: pulpe pui 220g + lipie + legume\n(+ 1 pahar vin sec)'}
+  ],prot:{elena:'103g',sot:'136g'}},
+  {day:'Duminică',theme:'Supă Thermomix + carne',note:'Batch cooking: chiftele extra + supă de congelat.',rows:[
+    {masa:'Mic dejun',elena:'2 ouă posate + legume + brânză 50g + pâine integrală',copil:'Cereale cu lapte (singur)',sot:'3 ouă posate + legume + brânză 50g + pâine'},
+    {masa:'Prânz',elena:'Supă cu pui ~100g + tăiței Thermomix',copil:'Supă cu tăiței + chiftea',sot:'Supă cu pui ~150g + tăiței'},
+    {masa:'Cină',elena:'Cotlet porc 130g SAU pulpe pui 150g + salată roșii + telemea 50g',copil:'Pui/porc + pâine',sot:'Cotlet porc 160g SAU pulpe pui 200g + salată\n(fără pâine + 1 pahar vin sec)'}
+  ],prot:{elena:'90-100g',sot:'110-120g'}}
+];
+
+const SUPPL = [
+  {time:'🌅 Dimineața pe stomac gol (30-45 min înainte de mic dejun)',items:[
+    {id:'fier',name:'Fier + Vitamina C',note:'Împreună — NU cu lapte, ceai sau calciu'},
+    {id:'rhodiola',name:'Rhodiola',note:'Energizant — dimineața, nu seara'},
+    {id:'nac',name:'NAC 600mg',note:'Antioxidant'},
+    {id:'probiotic',name:'Probiotic',note:'20-30 min înainte de masă'}
+  ]},
+  {time:'🍳 Cu micul dejun (cu grăsimi)',items:[
+    {id:'d3',name:'D3 5000 IU + K2',note:'Liposolubil — obligatoriu cu mâncare cu grăsimi'},
+    {id:'omega3',name:'Omega 3 2g',note:'Cu mâncare'},
+    {id:'folat',name:'Methyl Folate 400mcg',note:''},
+    {id:'mg',name:'Mg bisglicinat',note:'Conform indicației medicului'}
+  ]},
+  {time:'🌙 Seara cu cina (~19:00)',items:[
+    {id:'forcapil',name:'Forcapil',note:'Cu cina — conține zinc+calciu, departe de fier'}
+  ]},
+  {time:'🌜 La culcare',items:[
+    {id:'progesteron',name:'Progesteron',note:'z1-12: 50mg · z13-26: 150mg Utrogestan'}
+  ]}
+];
+
+let curTab='today',workout=null,workoutDone=false,chart=null;
+function getToken(){return localStorage.getItem('todoist_token')||'';}
+
+function sw(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.getElementById('tab-'+tab).classList.add('on');
+  document.getElementById('ni-'+tab).classList.add('on');
+  curTab=tab;
+  const titles={today:'Bună!',workout:'Antrenament',meals:'Plan mese',suppl:'Suplimente',prog:'Progres',set:'Setări'};
+  document.getElementById('hdr-title').textContent=titles[tab]||'FitTrack';
+  if(tab==='today')renderToday();
+  if(tab==='workout')renderWorkout();
+  if(tab==='meals')renderMeals();
+  if(tab==='suppl')renderSuppl();
+  if(tab==='prog')renderProg();
+  if(tab==='set')renderSet();
+}
+
+async function apiGet(path){
+  const r=await fetch('https://api.todoist.com/rest/v2/'+path,{headers:{'Authorization':'Bearer '+getToken()}});
+  if(!r.ok)throw new Error('API error '+r.status);
+  return r.json();
+}
+async function apiPost(path,body){
+  const r=await fetch('https://api.todoist.com/rest/v2/'+path,{method:'POST',headers:{'Authorization':'Bearer '+getToken(),'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok)throw new Error('API error '+r.status);
+  return r.status===204?null:r.json();
+}
+
+async function fetchWorkout(){
+  const tasks=await apiGet('tasks?project_id='+PROJ_ID);
+  return tasks.find(t=>t.content.includes('💪')&&!t.parent_id)||null;
+}
+
+function parseExercises(desc){
+  if(!desc)return[];
+  return desc.split('\n').map(l=>{const m=l.match(/^\d+\.\s+(.+)/);return m?m[1].split('—')[0].split('–')[0].trim():null;}).filter(Boolean);
+}
+
+function buildKgOptions(slug,wid,idx){
+  const base=parseFloat(localStorage.getItem('kgbase_'+slug)||'0');
+  if(base===0)return[{v:0,label:'— kg'}];
+  const step=getStep(base);
+  return[{v:base-step,label:(base-step)+'kg'},{v:base,label:base+'kg'},{v:base+step,label:(base+step)+'kg'}];
+}
+
+function pickKg(btn){
+  const{wid,idx,kg,slug}=btn.dataset;
+  localStorage.setItem(kKey(wid,idx),kg);
+  localStorage.setItem('kgbase_'+slug,kg);
+  btn.closest('.pill-row').querySelectorAll('.kpill').forEach(b=>b.classList.toggle('sel',b===btn));
+}
+function pickDiff(btn){
+  const{wid,idx}=btn.dataset;
+  localStorage.setItem('diff_'+wid+'_'+idx,btn.dataset.diff);
+  btn.closest('.pill-row').querySelectorAll('.dpill').forEach(b=>b.classList.toggle('sel',b===btn));
+}
+
+async function finishWorkout(wid){
+  const exercises=parseExercises(workout.description);
+  const lines=exercises.map((ex,i)=>{
+    const slug=exSlug(ex);
+    const kg=localStorage.getItem(kKey(wid,i))||'?';
+    const diff=localStorage.getItem('diff_'+wid+'_'+i)||'?';
+    return `${i+1}. ${ex} → ${kg==='0'?'greutate corp':kg+'kg'} · ${diff}`;
+  });
+  const content='📊 Rezultate '+new Date().toLocaleDateString('ro-RO')+':\n'+lines.join('\n');
+  try{
+    await apiPost('comments',{task_id:wid,content});
+    await apiPost('tasks/'+wid+'/close',{});
+    workout=null;workoutDone=true;
+    localStorage.setItem('last_workout',new Date().toDateString());
+    renderWorkout();
+  }catch(e){alert('Eroare: '+e.message);}
+}
+
+async function renderWorkout(){
+  const el=document.getElementById('workout-inner');
+  if(!getToken()){
+    el.innerHTML='<div class="empty"><div class="empty-ico">🔑</div><p>Adaugă token Todoist în Setări.</p><br><button class="btn btn-p" onclick="sw(\'set\')">Deschide Setări</button></div>';
+    return;
+  }
+  if(workoutDone){
+    el.innerHTML='<div class="fin-box">✅ Antrenament finalizat! 🦵 Picioare sus 5-8 minute acum!</div><div style="padding:16px"><button class="btn btn-g" onclick="workoutDone=false;workout=null;renderWorkout()">↺ Reîncarcă</button></div>';
+    return;
+  }
+  if(!workout){
+    el.innerHTML='<div class="loading">Se caută antrenamentul activ...</div>';
+    try{workout=await fetchWorkout();}
+    catch(e){el.innerHTML='<div class="empty"><div class="empty-ico">⚠️</div><p style="color:var(--t2)">'+e.message+'</p><br><button class="btn btn-g" onclick="workout=null;renderWorkout()">Reîncarcă</button></div>';return;}
+  }
+  if(!workout){
+    el.innerHTML='<div class="empty"><div class="empty-ico">🎉</div><p style="color:var(--t2);font-size:14px">Nu există antrenament activ în Todoist.</p></div>';
+    return;
+  }
+  const exercises=parseExercises(workout.description);
+  const wid=workout.id;
+  let html='<div class="card" style="margin-bottom:0"><div class="ch"><div class="ct">'+workout.content+'</div><div class="cs">'+exercises.length+' exerciții</div></div>';
+  exercises.forEach((ex,i)=>{
+    const slug=exSlug(ex);
+    const kgOpts=buildKgOptions(slug,wid,i);
+    const savedKg=localStorage.getItem(kKey(wid,i));
+    const savedDiff=localStorage.getItem('diff_'+wid+'_'+i);
+    const exInfo=EX_DB[slug];
+    const fullName=exInfo?exInfo.name:ex;
+    html+='<div class="ex-card"><div class="ex-top"><span class="ex-name">'+fullName+'</span>';
+    if(exInfo)html+='<button class="info-btn" onclick="openModal(\''+slug+'\')">i</button>';
+    html+='</div>';
+    if(exInfo)html+='<div class="ex-sets">'+exInfo.sets+'</div>';
+    if(kgOpts[0].v===0){
+      html+='<div class="ex-lbl">Prima sesiune — notează kg după antrenament</div>';
+    }else{
+      html+='<div class="ex-lbl">Kg</div><div class="pill-row">';
+      kgOpts.forEach(opt=>{
+        html+='<button class="pill kpill'+(savedKg===String(opt.v)?' sel':'')+'" data-wid="'+wid+'" data-idx="'+i+'" data-kg="'+opt.v+'" data-slug="'+slug+'" onclick="pickKg(this)">'+opt.label+'</button>';
+      });
+      html+='</div>';
+    }
+    html+='<div class="ex-lbl">Dificultate</div><div class="pill-row">';
+    ['ușor','ok','greu'].forEach(d=>{
+      html+='<button class="pill dpill'+(savedDiff===d?' sel':'')+'" data-wid="'+wid+'" data-idx="'+i+'" data-diff="'+d+'" onclick="pickDiff(this)">'+d+'</button>';
+    });
+    html+='</div></div>';
+  });
+  html+='</div><div style="padding:16px 0"><button class="btn btn-p" onclick="finishWorkout(\''+wid+'\')">✅ Terminat — trimite în Todoist</button></div>';
+  html+='<div class="rem-box">🦵 Nu uita: picioare sus 5-8 minute după antrenamentul de azi!</div>';
+  el.innerHTML=html;
+}
+
+function renderMeals(){
+  const el=document.getElementById('meals-inner');
+  const today=new Date().getDay();
+  const todayIdx=today===0?6:today-1;
+  let html='';
+  MEALS.forEach((m,i)=>{
+    const isToday=i===todayIdx;
+    html+='<div class="card meal-day"><div class="meal-hdr" onclick="toggleMeal('+i+')">';
+    html+='<div><div class="meal-name">'+(isToday?'📍 ':'')+m.day+'</div><div class="meal-theme">'+m.theme+'</div></div>';
+    html+='<svg class="chevron'+(isToday?' open':'')+'" id="chev-'+i+'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
+    html+='</div><div class="meal-body'+(isToday?' on':'')+'" id="meal-'+i+'">';
+    if(m.note)html+='<div class="note-box">'+m.note+'</div>';
+    html+='<table class="meal-tbl"><thead><tr><th>Masă</th><th>Elena</th><th>Soț</th></tr></thead><tbody>';
+    m.rows.forEach(r=>{
+      html+='<tr><td style="font-weight:600;color:var(--a);white-space:nowrap">'+r.masa+'</td>';
+      html+='<td>'+r.elena.replace(/\n/g,'<br>')+'</td>';
+      html+='<td>'+r.sot.replace(/\n/g,'<br>')+'</td></tr>';
+    });
+    html+='</tbody></table><div style="padding:8px 16px 12px;display:flex;gap:8px"><span class="p-badge">Elena: ~'+m.prot.elena+'</span><span class="p-badge">Soț: ~'+m.prot.sot+'</span></div></div></div>';
+  });
+  el.innerHTML=html;
+}
+function toggleMeal(i){
+  document.getElementById('meal-'+i).classList.toggle('on');
+  document.getElementById('chev-'+i).classList.toggle('open');
+}
+
+function renderSuppl(){
+  const el=document.getElementById('suppl-inner');
+  const today=new Date().toDateString();
+  const checked=lsJ('suppl_'+today)||{};
+  let html='<div style="padding:16px"><div class="sec">'+today+'</div>';
+  SUPPL.forEach(group=>{
+    html+='<div class="card" style="margin-bottom:12px"><div class="t-hdr">'+group.time+'</div>';
+    group.items.forEach(s=>{
+      const on=!!checked[s.id];
+      html+='<div class="supp-item" onclick="toggleSupp(\''+s.id+'\')" id="supp-row-'+s.id+'">';
+      html+='<div class="s-chk'+(on?' on':'')+'" id="schk-'+s.id+'"></div>';
+      html+='<div><div class="s-name'+(on?' on':'')+'" id="sname-'+s.id+'">'+s.name+'</div>';
+      if(s.note)html+='<div class="s-note">'+s.note+'</div>';
+      html+='</div></div>';
+    });
+    html+='</div>';
+  });
+  const total=SUPPL.reduce((a,g)=>a+g.items.length,0);
+  const done=Object.keys(checked).filter(k=>checked[k]).length;
+  html+='<div class="rem-box">✅ '+done+' / '+total+' suplimente bifate azi</div></div>';
+  el.innerHTML=html;
+}
+function toggleSupp(id){
+  const today=new Date().toDateString();
+  const checked=lsJ('suppl_'+today)||{};
+  checked[id]=!checked[id];
+  lsJ('suppl_'+today,checked);
+  const on=checked[id];
+  const chk=document.getElementById('schk-'+id);
+  const nm=document.getElementById('sname-'+id);
+  if(chk)chk.className='s-chk'+(on?' on':'');
+  if(nm)nm.className='s-name'+(on?' on':'');
+  const total=SUPPL.reduce((a,g)=>a+g.items.length,0);
+  const done=Object.keys(checked).filter(k=>checked[k]).length;
+  const rem=document.querySelector('#tab-suppl .rem-box');
+  if(rem)rem.textContent='✅ '+done+' / '+total+' suplimente bifate azi';
+}
+
+function renderProg(){
+  const el=document.getElementById('prog-inner');
+  const weights=lsJ('weights')||[];
+  const today=new Date().toDateString();
+  const lastW=weights.length?weights[weights.length-1].v:null;
+  const firstW=weights.length?weights[0].v:null;
+  const diff=(lastW&&firstW)?((lastW-firstW).toFixed(1)):null;
+  let html='<div style="padding:16px">';
+  html+='<div class="stat-grid">';
+  html+='<div class="stat"><div class="stat-l">Greutate curentă</div><div class="stat-v">'+(lastW||'—')+'<span class="stat-u"> kg</span></div></div>';
+  html+='<div class="stat"><div class="stat-l">Variație totală</div><div class="stat-v">'+(diff!==null?(diff>0?'+':'')+diff:'—')+'<span class="stat-u"> kg</span></div></div>';
+  html+='<div class="stat"><div class="stat-l">Zile înregistrate</div><div class="stat-v">'+weights.length+'<span class="stat-u"> zile</span></div></div>';
+  html+='<div class="stat"><div class="stat-l">Țintă</div><div class="stat-v">51-54<span class="stat-u"> kg</span></div></div>';
+  html+='</div>';
+  html+='<div class="sec">Loghează greutatea azi</div>';
+  html+='<div class="card"><div class="cb" style="display:flex;gap:10px;align-items:center"><input class="w-inp" type="number" id="w-inp" step="0.1" placeholder="52.7" style="flex:1"><button class="btn btn-p" style="width:auto;padding:12px 20px" onclick="logWeight()">Salvează</button></div></div>';
+  if(weights.length>1){
+    html+='<div class="sec">Evoluție greutate</div><div class="card"><div class="cb"><canvas id="w-chart" height="180"></canvas></div></div>';
+  }
+  if(weights.length>0){
+    html+='<div class="sec">Istoric</div><div class="card"><div class="cb">';
+    [...weights].reverse().slice(0,10).forEach(w=>{
+      html+='<div class="wlog-row"><span class="wlog-date">'+w.date+'</span><span class="wlog-val">'+w.v+' kg</span></div>';
+    });
+    html+='</div></div>';
+  }
+  html+='</div>';
+  el.innerHTML=html;
+  if(weights.length>1){
+    setTimeout(()=>{
+      const ctx=document.getElementById('w-chart');
+      if(!ctx)return;
+      if(chart){chart.destroy();chart=null;}
+      chart=new Chart(ctx,{type:'line',data:{
+        labels:weights.map(w=>w.date.split(' ').slice(1,3).join(' ')),
+        datasets:[{data:weights.map(w=>w.v),borderColor:'#7c4daf',backgroundColor:'rgba(124,77,175,.1)',tension:.3,pointBackgroundColor:'#7c4daf',pointRadius:4,fill:true},
+          {data:weights.map(()=>51),borderColor:'rgba(124,77,175,.2)',borderDash:[4,4],pointRadius:0},
+          {data:weights.map(()=>54),borderColor:'rgba(124,77,175,.2)',borderDash:[4,4],pointRadius:0}]
+      },options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{min:49,max:56,grid:{color:'rgba(0,0,0,.05)'}},x:{grid:{display:false},ticks:{maxTicksLimit:6}}}}});
+    },100);
+  }
+}
+function logWeight(){
+  const v=parseFloat(document.getElementById('w-inp').value);
+  if(!v||v<30||v>200){alert('Greutate invalidă');return;}
+  const weights=lsJ('weights')||[];
+  const today=new Date().toLocaleDateString('ro-RO',{day:'numeric',month:'short'});
+  weights.push({date:today,v:Math.round(v*10)/10});
+  lsJ('weights',weights);
+  renderProg();
+}
+
+function renderToday(){
+  const el=document.getElementById('today-inner');
+  const days=['Duminică','Luni','Marți','Miercuri','Joi','Vineri','Sâmbătă'];
+  const today=new Date();
+  const dayName=days[today.getDay()];
+  const dayIdx=today.getDay()===0?6:today.getDay()-1;
+  const meal=MEALS[dayIdx];
+  const todayStr=today.toDateString();
+  const water=parseInt(localStorage.getItem('water_'+todayStr)||'0');
+  const checked=lsJ('suppl_'+todayStr)||{};
+  const total=SUPPL.reduce((a,g)=>a+g.items.length,0);
+  const doneSuppl=Object.keys(checked).filter(k=>checked[k]).length;
+  const lastW=(lsJ('weights')||[]);
+  const lastWeight=lastW.length?lastW[lastW.length-1].v:null;
+  let html='<div style="padding:16px">';
+  html+='<div class="sec">'+today.toLocaleDateString('ro-RO',{weekday:'long',day:'numeric',month:'long'})+'</div>';
+  if(!getToken())html+='<div class="rem-box">🔑 Adaugă token Todoist în Setări pentru antrenamente.</div>';
+  html+='<div class="stat-grid">';
+  html+='<div class="stat"><div class="stat-l">Greutate</div><div class="stat-v">'+(lastWeight||'—')+'<span class="stat-u"> kg</span></div></div>';
+  html+='<div class="stat"><div class="stat-l">Apă azi</div><div><span class="stat-v">'+water+'</span><span class="stat-u"> / 8</span></div></div>';
+  html+='</div>';
+  html+='<div class="card"><div class="cb"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><span style="font-weight:600;font-size:14px">💧 Apă</span><span style="font-size:13px;color:var(--t2)">'+water+'/8</span></div><div class="glasses" id="glasses-today">';
+  for(let i=0;i<8;i++)html+='<div class="glass'+(i<water?' on':'')+'" onclick="addWater('+i+')" id="g-'+i+'">💧</div>';
+  html+='</div></div></div>';
+  html+='<div class="card"><div class="cb"><div style="display:flex;align-items:center;justify-content:space-between"><span style="font-weight:600;font-size:14px">💊 Suplimente</span><span class="tag '+(doneSuppl===total?'tag-ok':'tag-w')+'">'+doneSuppl+'/'+total+'</span></div><div style="height:6px;background:var(--bd);border-radius:3px;margin-top:10px"><div style="height:100%;width:'+Math.round(doneSuppl/total*100)+'%;background:var(--a);border-radius:3px"></div></div><button class="btn btn-g btn-sm" style="margin-top:10px" onclick="sw(\'suppl\')">Deschide suplimente →</button></div></div>';
+  html+='<div class="sec">Masa de azi — '+meal.day+': '+meal.theme+'</div>';
+  html+='<div class="card"><table class="meal-tbl"><thead><tr><th>Masă</th><th>Elena</th></tr></thead><tbody>';
+  meal.rows.forEach(r=>{html+='<tr><td style="font-weight:600;color:var(--a);white-space:nowrap">'+r.masa+'</td><td>'+r.elena.split('\n')[0]+'</td></tr>';});
+  html+='</tbody></table></div>';
+  html+='<button class="btn btn-p" style="margin-bottom:12px" onclick="sw(\'workout\')">💪 Deschide antrenamentul</button>';
+  html+='</div>';
+  el.innerHTML=html;
+  document.getElementById('hdr-title').textContent='Bună, Elena! 👋';
+  document.getElementById('hdr-tag').textContent=dayName;
+}
+function addWater(idx){
+  const todayStr=new Date().toDateString();
+  let water=parseInt(localStorage.getItem('water_'+todayStr)||'0');
+  if(idx<water)water=idx;else water=idx+1;
+  water=Math.min(8,Math.max(0,water));
+  localStorage.setItem('water_'+todayStr,water);
+  for(let i=0;i<8;i++){const g=document.getElementById('g-'+i);if(g)g.className='glass'+(i<water?' on':'');}
+}
+
+function openModal(slug){
+  const ex=EX_DB[slug];
+  if(!ex)return;
+  const pBadges=ex.primary.map(m=>'<span class="m-badge m-p">'+m+'</span>').join('');
+  const sBadges=ex.secondary.map(m=>'<span class="m-badge m-s">'+m+'</span>').join('');
+  const steps=ex.steps.map((s,i)=>'<div class="step"><div class="s-num">'+(i+1)+'</div><div class="s-txt">'+s+'</div></div>').join('');
+  document.getElementById('ex-modal-content').innerHTML=
+    '<div class="modal-title">'+ex.name+'</div>'+
+    '<div class="modal-sub">'+ex.sets+'</div>'+
+    '<div class="sec" style="margin-top:0">Mușchi principali</div>'+
+    '<div class="muscles-row">'+pBadges+'</div>'+
+    (ex.secondary.length?'<div class="sec">Mușchi secundari</div><div class="muscles-row">'+sBadges+'</div>':'')+
+    '<div class="sec">Execuție</div>'+
+    '<div class="step-list">'+steps+'</div>'+
+    (ex.warning?'<div class="warn-box">⚠️ '+ex.warning+'</div>':'')+
+    '<button class="btn btn-g" style="margin-top:16px" onclick="closeModal()">Închide</button>';
+  document.getElementById('ex-modal').classList.add('on');
+}
+function closeModal(e){
+  if(!e||e.target===document.getElementById('ex-modal'))
+    document.getElementById('ex-modal').classList.remove('on');
+}
+
+function renderSet(){
+  const el=document.getElementById('set-inner');
+  const tok=getToken();
+  el.innerHTML='<div style="padding:16px">'+
+    '<div class="sec">Cont Todoist</div>'+
+    '<div class="card"><div class="cb">'+
+    '<div style="font-size:13px;color:var(--t2);margin-bottom:10px">Token necesar pentru sincronizarea antrenamentelor. Îl găsești în Todoist → Settings → Integrations → Developer → API token.</div>'+
+    '<input class="tok-inp" id="tok-inp" type="password" placeholder="Token API Todoist" value="'+tok+'">'+
+    '<button class="btn btn-p btn-sm" style="margin-top:10px" onclick="saveToken()">Salvează token</button>'+
+    '</div></div>'+
+    '<div class="sec">Date</div>'+
+    '<div class="card"><div class="cb">'+
+    '<button class="btn btn-g btn-sm" onclick="if(confirm(\'Ștergi istoricul de greutate?\'))localStorage.removeItem(\'weights\'),alert(\'Șters!\')">Șterge istoricul greutate</button>'+
+    '</div></div>'+
+    '<div class="sec">Versiune</div>'+
+    '<div class="card"><div class="cb" style="font-size:13px;color:var(--t2)">FitTrack Elena · v1.0 · Soft purple<br>Antrenament A/B/C/D · Todoist sync · Offline ready</div></div>'+
+    '</div>';
+}
+function saveToken(){
+  const v=document.getElementById('tok-inp').value.trim();
+  localStorage.setItem('todoist_token',v);
+  workout=null;
+  alert('Token salvat!');
+}
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+renderToday();
+renderMeals();
+renderSuppl();
+</script>
+</body>
+</html>
