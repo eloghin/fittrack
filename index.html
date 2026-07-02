@@ -294,7 +294,7 @@ async function apiGet(path){
   }catch(e){
     throw new Error('Network: '+e.message);
   }
-  if(!r.ok)throw new Error('HTTP '+r.status+' ('+path+')');
+  if(!r.ok){const body=await r.text().catch(()=>'');throw new Error(r.status+': '+body.substring(0,80));}
   return r.json();
 }
 async function apiPost(path,body){
