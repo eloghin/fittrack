@@ -309,8 +309,8 @@ async function apiPost(path,body){
 }
 
 async function fetchWorkout(){
-  const tasks=await apiGet('tasks?project_id='+PROJ_ID);
-  return tasks.find(t=>t.content.includes('💪')&&!t.parent_id)||null;
+  const tasks=await apiGet('tasks');
+  return tasks.find(t=>t.project_id===PROJ_ID&&t.content.includes('💪')&&!t.parent_id)||null;
 }
 
 function parseExercises(desc){
