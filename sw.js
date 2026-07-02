@@ -1,14 +1,7 @@
-const CACHE = 'fittrack-v4';
-const FILES = ['/fittrack/', '/fittrack/index.html', '/fittrack/manifest.json'];
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));
-  self.skipWaiting();
-});
+// fittrack-v5 — no cache, always fresh
+self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))));
+  e.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));
   self.clients.claim();
 });
-self.addEventListener('fetch', e => {
-  if(e.request.url.includes('todoist.com')) return;
-  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
-});
+// No fetch handler = browser fetches everything fresh from network

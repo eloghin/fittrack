@@ -286,7 +286,7 @@ function sw(tab){
   if(tab==='set')renderSet();
 }
 
-const TODOIST_BASE='https://api.todoist.com/api/v1/';
+const TODOIST_BASE='https://api.todoist.com/rest/v2/';
 async function apiGet(path){
   let r;
   try{
@@ -618,7 +618,14 @@ function saveToken(){
 }
 
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
+  navigator.serviceWorker.register('sw.js').then(reg=>{
+    reg.addEventListener('updatefound',()=>{
+      const sw=reg.installing;
+      sw.addEventListener('statechange',()=>{
+        if(sw.state==='activated') location.reload();
+      });
+    });
+  });
 }
 
 renderToday();
