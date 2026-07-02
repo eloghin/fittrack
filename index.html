@@ -286,14 +286,29 @@ function sw(tab){
   if(tab==='set')renderSet();
 }
 
+const TODOIST_BASE='https://api.todoist.com/rest/v2/';
+const PROXY='https://corsproxy.io/?url=';
 async function apiGet(path){
-  const r=await fetch('https://api.todoist.com/rest/v2/'+path,{headers:{'Authorization':'Bearer '+getToken()}});
-  if(!r.ok)throw new Error('API error '+r.status);
+  const url=TODOIST_BASE+path;
+  let r;
+  try{
+    r=await fetch(url,{headers:{'Authorization':'Bearer '+getToken()}});
+  }catch{
+    r=await fetch(PROXY+encodeURIComponent(url),{headers:{'Authorization':'Bearer '+getToken()}});
+  }
+  if(!r.ok)throw new Error('HTTP '+r.status);
   return r.json();
 }
 async function apiPost(path,body){
-  const r=await fetch('https://api.todoist.com/rest/v2/'+path,{method:'POST',headers:{'Authorization':'Bearer '+getToken(),'Content-Type':'application/json'},body:JSON.stringify(body)});
-  if(!r.ok)throw new Error('API error '+r.status);
+  const url=TODOIST_BASE+path;
+  const opts={method:'POST',headers:{'Authorization':'Bearer '+getToken(),'Content-Type':'application/json'},body:JSON.stringify(body)};
+  let r;
+  try{
+    r=await fetch(url,opts);
+  }catch{
+    r=await fetch(PROXY+encodeURIComponent(url),opts);
+  }
+  if(!r.ok)throw new Error('HTTP '+r.status);
   return r.status===204?null:r.json();
 }
 
